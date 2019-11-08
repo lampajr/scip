@@ -5,11 +5,11 @@
 **Date**: November 7, 2019
 
 **Author**:  
-   Ghareeb Falazi  
-   Uwe Breitenbücher  
-   Florian Daniel  
-   Andrea Lamparelli  
-   Frank Leymann  
+  Ghareeb Falazi  
+  Uwe Breitenbücher  
+  Florian Daniel  
+  Andrea Lamparelli  
+  Frank Leymann  
 
 ## Introduction
 This document specifies the Smart Contract Invocation Protocol (SCIP) natural evolvement of the Smart Contract Locator ([SCL](https://bit.ly/2WRXvCZ)), intended to provide a protocol specification in the context of blockchains integration that allows external consumer applications to invoke smart contract functions in a uniform manner regardless of the underlying blockchain technology. Moreover it provides the capability to monitor smart contracts at runtime. The protocol assumes that the underlying blockchain technology is compatible with the Smart Contract Description Language ([SCDL](https://bit.ly/2JZUA5S))
