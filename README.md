@@ -155,46 +155,46 @@ A simple example of JSON-RPC messages exchange for the **SubscribeToEvent** SCIP
 ```
 // Client request
 --> {
-		"jsonrpc": "2.0", 
-	 	"method": "SubscribeToEvent", 					// Name of the request
-	 	"id": 1,
-	 	"params": {
-	 		"identifier": "priceChanged",				// Name of the event
-	 		"params": [{
-	 			"name": "newPrice",						// Name of the parameter
-	 			"isInput": false,						// It is an output parameter
-	 			"natType": "uint256"					// Native type
-	 		}],
-	 		"doc": 98.9,								// Degree of Confidence 
-	 		"corrId": "abcdefg12345",
-	 		"callback": "https://my-domain.com/callbacks",
-	 		"filter": "newPrice >= 500"
-	 	}
+	"jsonrpc": "2.0", 
+	"method": "SubscribeToEvent", 					// Name of the request
+	"id": 1,
+	"params": {
+		"identifier": "priceChanged",				// Name of the event
+		"params": [{
+			"name": "newPrice",				// Name of the parameter
+			"isInput": false,				// It is an output parameter
+			"natType": "uint256"				// Native type
+		}],
+		"doc": 98.9,						// Degree of Confidence 
+		"corrId": "abcdefg12345",
+		"callback": "https://my-domain.com/callbacks",
+		"filter": "newPrice >= 500"
 	}
+}
 	
 // Synchronous response
 <-- {
-		"jsonrpc": "2.0", 
-	 	"result": "OK",
-	 	"id": 1,
-	}
+	"jsonrpc": "2.0", 
+	"result": "OK",
+	"id": 1,
+}
 	
 // Asynchronous response
 <-- {
-		"jsonrpc": "2.0", 
-	 	"method": "ReceiveCallback",
-	 	"params": {
-	 		"identifier": "priceChanged",				// Name of the event
-	 		"params": [{
-	 			"name": "newPrice",						// Name of the parameter
-	 			"isInput": false,						// It is an output parameter
-	 			"natType": "uint256",					// Native type
-	 			"value": 670							// Value of the parameter
-	 		}],
-	 		"doc": 98.9,								// Degree of Confidence 
-	 		"corrId": "abcdefg12345",
-	 		"when": "2019-11-06T17:08:00Z"
-	 	}
+	"jsonrpc": "2.0", 
+	"method": "ReceiveCallback",
+	"params": {
+		"identifier": "priceChanged",				// Name of the event
+		"params": [{
+			"name": "newPrice",				// Name of the parameter
+			"isInput": false,						// It is an output parameter
+			"natType": "uint256",				// Native type
+			"value": 670					// Value of the parameter
+		}],
+		"doc": 98.9,						// Degree of Confidence 
+		"corrId": "abcdefg12345",
+		"when": "2019-11-06T17:08:00Z"
 	}
+}
 ```
 
