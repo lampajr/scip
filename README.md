@@ -25,7 +25,7 @@ The protocol defines a total of six methods that can be grouped into three categ
 This category includes one single method, called ***InvokeFunction***, which is used to allow an external application to invoke a specific smart contract function. Figure 1 shows the steps taken by client application and gateway when this method is triggered: The client formulates an *InvokeFunction* request message (i) in according to the structure defined in table 1.
 
 <figure>
-    <img src="invoke-steps-fig.png" width="600px">
+    <img src="images/invoke-steps-fig.png" width="600px">
     <figcaption><strong>Figure 1</strong>  -  Steps performed by client and gateway during the execution of *InvokeFunction* method</figcaption>
 </figure>
 
@@ -35,9 +35,8 @@ Once the message is formulated the client has to sign it using the algorithm  "S
 
 Table 1
 
-
 <figure>
-    <img src="invocation-table.png" width="600px">
+    <img src="images/invocation-table.png" width="600px">
     <figcaption><strong>Table 1</strong>  -  The structure of the <i>InvokeFunction</i> request and response message</figcaption>
 </figure>
 
@@ -50,7 +49,7 @@ This category includes methods that facilitate the live monitoring of interestin
 
 
 <figure>
-    <img src="subscribe-table.png" width="600px">
+    <img src="images/subscribe-table.png" width="600px">
     <figcaption><strong>Table 2</strong>  -  The structure of the <i>SubscribeToEvent</i> and <i>SubscribeToFunction</i> request and response messages</figcaption>
 </figure>
 
@@ -59,7 +58,7 @@ Obviously for each subscription method there exist a respective cancel one, henc
 
 
 <figure>
-    <img src="cancel-subscription-table.png" width="600px">
+    <img src="images/cancel-subscription-table.png" width="600px">
     <figcaption><strong>Table 3</strong>  -  The structure of the <i>CancelEventSubscription</i> and <i>CancelFunctionSubscription</i> request message.</figcaption>
 </figure>
 
@@ -72,7 +71,7 @@ The methods in this category allow a client application to query the previous oc
 
 
 <figure>
-    <img src="querying-table.png" width="600px">
+    <img src="images/querying-table.png" width="600px">
     <figcaption><strong>Table 4</strong>  -  The structure of the <i>QueryEventOccurrences</i> and <i>QueryFunctionInvocations</i> request and response messages.</figcaption>
 </figure>
 
