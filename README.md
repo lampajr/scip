@@ -187,7 +187,7 @@ A simple example of JSON-RPC messages exchange for the **SubscribeToEvent** SCIP
 		"identifier": "priceChanged",				// Name of the event
 		"params": [{
 			"name": "newPrice",				// Name of the parameter
-			"isInput": false,						// It is an output parameter
+			"isInput": false,				// It is an output parameter
 			"natType": "uint256",				// Native type
 			"value": 670					// Value of the parameter
 		}],
