@@ -198,3 +198,125 @@ A simple example of JSON-RPC messages exchange for the **SubscribeToEvent** SCIP
 }
 ```
 
+## Data Encoding
+
+Here we show how blockchain native types of some blockchains can be mapped to JSON Schema.
+
+### Ethereum
+
+#### uint\<M\>
+	
+```
+{
+	"type": "integer",
+ 	"minimum": 0,
+ 	"maximum": 2^M
+}
+```
+
+#### int\<M\>
+	
+```
+{
+	"type": "integer",
+ 	"minimum": -2^(M-1),
+ 	"maximum": +2^(M-1)
+}
+```
+
+#### address
+
+```
+{
+	"type": "string",
+	"pattern": "^0x[a-fA-F0-9]{40}$"
+}
+```
+
+#### bool
+
+```
+{
+	"type": "boolean",
+}
+```
+
+#### fixed\<M\>x\<N\>
+	
+```
+{
+	"type": "number",
+	"minimum": -2^(M-1),
+	"maximum": +2^(M-1),
+	"multiple_of": 10^(-N)
+}
+```
+
+#### bytes\<M\>
+
+```
+{
+	"type": "array",
+	"maxItems": M,
+	"items": {
+		"type": "string",
+		"pattern": "^[a-fA-F0-9]{2}$"
+	}
+}
+```
+
+#### \<type\>[M]
+
+```
+{
+	"type": "array",
+	"maxItems": M,
+	"items": <type>
+}
+```
+
+#### \<type\>[]
+
+```
+{
+	"type": "array",
+	"items": <type>
+}
+```
+
+#### bytes
+
+```
+{
+	"type": "array",
+	"items": {
+		"type": "string",
+		"pattern": "^[a-fA-F0-9]{2}$"
+	}
+}
+```
+
+
+#### string
+
+```
+{
+	"type": "string",
+}
+```
+
+#### (T1, T2, .... Tn)
+
+```
+{
+	"type": "array",
+	"items": [
+		{"type": <T1>},
+		{"type": <T2>},
+		...,
+		{"type": <Tn>}
+	]
+}
+```
+
+
