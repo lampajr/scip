@@ -248,7 +248,7 @@ Here we show how blockchain native types of some blockchains can be mapped to JS
 	"type": "number",
 	"minimum": -2^(M-1),
 	"maximum": +2^(M-1),
-	"multiple_of": 10^(-N)
+	"multipleOf": 10^(-N)
 }
 ```
 
