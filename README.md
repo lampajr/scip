@@ -210,7 +210,7 @@ Here we show how blockchain native types of some blockchains can be mapped to JS
 {
 	"type": "integer",
  	"minimum": 0,
- 	"maximum": 2^M
+ 	"maximum": 2^M - 1
 }
 ```
 
