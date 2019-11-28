@@ -12,24 +12,68 @@
   Frank Leymann  
 
 ## Introduction
-This document specifies the Smart Contract Invocation Protocol (SCIP) natural evolvement of the Smart Contract Locator ([SCL](https://bit.ly/2WRXvCZ)), intended to provide a protocol specification in the context of blockchains integration that allows external consumer applications to invoke smart contract functions in a uniform manner regardless of the underlying blockchain technology. Moreover it provides the capability to monitor smart contracts at runtime. The protocol assumes that the underlying blockchain technology is compatible with the Smart Contract Description Language ([SCDL](https://bit.ly/2JZUA5S))
+This document specifies the Smart Contract Invocation Protocol (SCIP) as natural evolvement of the Smart Contract Locator ([SCL](https://bit.ly/2WRXvCZ)), intended to provide a protocol specification in the context of blockchains integration that allows external consumer applications to invoke smart contract functions in a uniform manner regardless of the underlying blockchain technology. Moreover it provides the capability to monitor smart contracts at runtime. The protocol assumes that the underlying blockchain technology is compatible with the Smart Contract Description Language ([SCDL](https://bit.ly/2JZUA5S)). This core of the interface consists of a set of *methods* that can be used by blockchain-external consumer applications to interact with *smart contracts*. The methods are provided by an entity, called *gateway* (actual SCIP endpoint), which mediates between two or more different network technologies: the Internet and the blockchain networks. This gateway is reachable using the aforementioned *Smart Contract Locator* ([SCL](https://bit.ly/2WRXvCZ)), which uniquely identifies a smart contract outside the blockchain. We assume that client applications authenticate themselves with the gateway using OAuth 2.0, and that attacks like the Man-In-The-Middle (MITM) are thus prevented.
+
+<br/>
 
 ## Protocol Specification
-The protocol defines a total of six methods that can be grouped into three categories:
-* *Invocation of smart contracts function.*
-* *Live-monitoring of function invocation and event occurrences.*
-* *Querying of past invocations and events*
+The protocol define a total of four different allowed methods:
 
-A summary of all messages used as request or response of the protocol methods are defined in the Figure 1, which shows them in the form of metamodel. Next, we describe the semantics, as well as the exchanged messages for each of these methods in details.
+* The *invocation* of a smart contract function
+* The *subscription* to notifications regarding function invocations or event occurrences
+* The *unsubscription* from live monitoring
+* The *querying* of past invocations or events
+
+Every method is associated to a specific request message, all of them can be found in **Figure 1**, which shows the metamodel of all four request and two response messages. . The bold boxes represent the SCIP messages, whereas the regular ones represent the message content fields. For readability, the metamodel is split into related sub-models.
 
 <br/><br/>
 
 <figure>
     <img src="images/messages-metamodel.png" width="800px">
-    <figcaption><strong>Figure 1</strong>  -  A metamodel describing the various messages of the SCIP protocol.</figcaption>
+    <figcaption><strong>Figure 1</strong>  -  The metamodel of SCIP messages.</figcaption>
 </figure>
 
-### Function Invocation
+All methods return a *synchronous* response message indicating the success or failure of the request, and some of them additionally return one or more *asynchronous* responses or errors. **Table 1** provides a detailed description of all call constructs defined in the previous metamodel.
+
+<figure>
+    <img src="images/fields-table.png" width="800px">
+    <figcaption><strong>Table 1</strong>  -  Description of fields used in SCIP protocol.</figcaption>
+</figure>
+
+Some methods may require a point in time at which an event or a function took place, in this context the *time* refers to the UTC timestamp of the transaction that triggered the event or invoked the function. In particular the time is represented using the ISO 8601-1:2019 combined date and time representation. Certain other methods have a parameter called *degree of confidence* (DoC), which refers to the likelihood that a transaction included in a block will remain persistently stored on the blockchain. A value close to 1 means that the client application wants to receive the result only after ruling out the possibility that the block - including the transaction - may eventually be dropped from the blockchain, whereas a value close to 0 means that the client wants to receive the result as soon as it is available.
+
+
+
+### Invocation
+
+The invocation request is performed through the **Invoke** method, which allows an external application to invoke a specific smart contract function. The structure of the *Invocation* request message, as well as the asynchronous *Callback* message are explained in the **Figure 1a**. In particular this request message contains the name of the function and the list of input parameters, which allow to uniquely identify the specific function, a callback URL to which the gateway will send the asynchronous responses, a base64 encoding of the request message, and finally some optional fields like degree of confidence, correlation identifier, timeout and a list of output parameters that that specifies which parameters the client wants to receive as result from the function invocation (must be a subset of the actual return parameters of the function). A complete list of *Invocation Request* fields can be found in **Table 2**. A deeper description of how this request is handled by the gateway can be found in [invocation example](#step-by-step-invocation) section.
+
+TODO: add table Invocation fields
+
+### Subscription
+
+This request is executed using the **Subscribe** method, in particular this request facilitates the live monitoring of smart contracts by allowing a client application to receive asynchronous notifications about event occurrences or smart contract function invocations. The structure of the message is described in **Figure 1b**, notice that exactly one field, between function identifier and event identifier, must be included. When receiving this specific request, the gateway identifies the designated event/function using the appropriate *identifier*, the field *parameters* further helps the gateway to differentiate between overloads. Then the gateway starts monitoring the event or function and whenever an occurrence is detected, the associated event outputs / function inputs are used to populate and evaluate the Boolean expression specified in the filter. If the expression returns *true* and the transaction causing the occurrence has reached the specified *degree of confidence*, a *Callback* (**Figure 1a**) message to the address specified in *callback URL* is issued. If a new subscription request is made by a client application with a correlation identifier already in
+use, then the old subscription is cancelled and replaced with the new one. This could happen, e.g., if a client application wants to change the expression of the filter, the value of the degree of confidence, or the callback URL of an existing subscription.
+
+TODO: add table subscription fields
+
+### Unsubscription
+
+
+
+
+
+
+
+### Step by Step Invocation
+
+
+
+
+
+
+
+### Invocation 
 
 This category includes one single method, called ***InvokeFunction***, which is used to allow an external application to invoke a specific smart contract function. Figure 2 shows the steps taken by client application and gateway when this method is triggered: The client formulates an *InvokeFunction* request message (i) in according to the structure defined in Table 1.  
 
@@ -205,7 +249,7 @@ Here we show how blockchain native types of some blockchains can be mapped to JS
 ### Ethereum
 
 #### uint\<M\>
-	
+
 ```
 {
 	"type": "integer",
@@ -215,7 +259,7 @@ Here we show how blockchain native types of some blockchains can be mapped to JS
 ```
 
 #### int\<M\>
-	
+
 ```
 {
 	"type": "integer",
@@ -242,7 +286,7 @@ Here we show how blockchain native types of some blockchains can be mapped to JS
 ```
 
 #### fixed\<M\>x\<N\>
-	
+
 ```
 {
 	"type": "number",
