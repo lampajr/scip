@@ -33,12 +33,16 @@ Every method is associated to a specific request message, all of them can be fou
     <figcaption><strong>Figure 1</strong>  -  The metamodel of SCIP messages.</figcaption>
 </figure>
 
+<br/><br/>
+
 All methods return a *synchronous* response message indicating the success or failure of the request, and some of them additionally return one or more *asynchronous* responses or errors. **Table 1** provides a detailed description of all call constructs defined in the previous metamodel.
 
 <figure>
     <img src="images/fields-table.png" width="800px">
     <figcaption><strong>Table 1</strong>  -  Description of fields used in SCIP protocol.</figcaption>
 </figure>
+
+<br/><br/>
 
 Some methods may require a point in time at which an event or a function took place, in this context the *time* refers to the UTC timestamp of the transaction that triggered the event or invoked the function. In particular the time is represented using the ISO 8601-1:2019 combined date and time representation. Certain other methods have a parameter called *degree of confidence* (DoC), which refers to the likelihood that a transaction included in a block will remain persistently stored on the blockchain. A value close to 1 means that the client application wants to receive the result only after ruling out the possibility that the block - including the transaction - may eventually be dropped from the blockchain, whereas a value close to 0 means that the client wants to receive the result as soon as it is available.
 
@@ -48,90 +52,84 @@ Some methods may require a point in time at which an event or a function took pl
 
 The invocation request is performed through the **Invoke** method, which allows an external application to invoke a specific smart contract function. The structure of the *Invocation* request message, as well as the asynchronous *Callback* message are explained in the **Figure 1a**. In particular this request message contains the name of the function and the list of input parameters, which allow to uniquely identify the specific function, a callback URL to which the gateway will send the asynchronous responses, a base64 encoding of the request message, and finally some optional fields like degree of confidence, correlation identifier, timeout and a list of output parameters that that specifies which parameters the client wants to receive as result from the function invocation (must be a subset of the actual return parameters of the function). A complete list of *Invocation Request* fields can be found in **Table 2**. A deeper description of how this request is handled by the gateway can be found in [invocation example](#step-by-step-invocation) section.
 
-TODO: add table Invocation fields
+<br/><br/>
+
+<figure>
+    <img src="images/invocation-table.png" width="700px">
+    <figcaption><strong>Table 2</strong>  -  The structure of the <i>Invoke</i> request and response message</figcaption>
+</figure>  
+
+<br/>
 
 ### Subscription
 
 This request is executed using the **Subscribe** method, in particular this request facilitates the live monitoring of smart contracts by allowing a client application to receive asynchronous notifications about event occurrences or smart contract function invocations. The structure of the message is described in **Figure 1b**, notice that exactly one field, between function identifier and event identifier, must be included. When receiving this specific request, the gateway identifies the designated event/function using the appropriate *identifier*, the field *parameters* further helps the gateway to differentiate between overloads. Then the gateway starts monitoring the event or function and whenever an occurrence is detected, the associated event outputs / function inputs are used to populate and evaluate the Boolean expression specified in the filter. If the expression returns *true* and the transaction causing the occurrence has reached the specified *degree of confidence*, a *Callback* (**Figure 1a**) message to the address specified in *callback URL* is issued. If a new subscription request is made by a client application with a correlation identifier already in
 use, then the old subscription is cancelled and replaced with the new one. This could happen, e.g., if a client application wants to change the expression of the filter, the value of the degree of confidence, or the callback URL of an existing subscription.
 
-TODO: add table subscription fields
+<br/>
+
+<br/>
+
+<figure>
+    <img src="images/subscribe-table.png" width="700px">
+    <figcaption><strong>Table 3</strong>  -  The structure of the <i>Subscribe</i> request and response messages</figcaption>
+</figure>  
+
+<br/>
 
 ### Unsubscription
 
+This request, in particular the **Unsubscribe** method, is used to explicitly cancel subscriptions of a client, previously generated using invocations of the *Subscribe* method. The structure of this message is exlpained in **Figure 1b**. It has four optional fields, which can be used in three ways: (i) if only either function identifier
+or event identifier plus parameters are present, then all respective subscriptions that belong to the target smart contract are cancelled; (ii) if only the correlation identifier is provided, then only the subscription corresponding to the identifier is cancelled; (iii) if none of the parameters is provided, then all subscriptions to the target smart contract are cancelled. All other combinations are invalid. This method does not have any asynchronous notifications, but only a synchronous one that indicates the success or not of the invocation.
 
+<br/>
+
+<br/>
+
+<figure>
+    <img src="images/cancel-subscription-table.png" width="600px">
+    <figcaption><strong>Table 4</strong>  -  The structure of the <i>Unsubscribe</i> request message.</figcaption>
+</figure>  
+
+<br/>
 
 ### Querying
 
+This request is performed through the **Query** method, its purpose is to allow client application to query previous occurrences of event or function invocations. It structure, as well as the synchronous response (**Query Result**) message are described in **Figure 1c**. When receiving a *Query* request message, the gateway scans the history of the blockchain and searches for event occurrences / function invocations with a prototype that matches the provided *event identifier/function identifier* and *parameters*. Furthermore the *timeframe* specifies the time frame in which the search results should be considered (by default the start time is the one of the genesis block, and the end time is the one of the latest block). Thanks to the *filter* field the client can specify a Boolean expression over the event/function parameters in order to select only those occurrences that satisfy it.
 
+<br/><br/>
 
+<figure>
+    <img src="images/querying-table.png" width="650px">
+    <figcaption><strong>Table 5</strong>  -  The structure of the <i>Query</i> request and response messages.</figcaption>
+</figure> 
 
+<br/>
 
-### Step by Step Invocation
+### Step-by-Step Function Invocation
 
+This section provides a step-by-step description of the **Invoke** method invocation. **Figure 2** shows the flowchart explaining the actions performed by both client application and gateway in case of a valid function invocation request id triggered. 
 
-
-
-
-
-
-### Invocation 
-
-This category includes one single method, called ***InvokeFunction***, which is used to allow an external application to invoke a specific smart contract function. Figure 2 shows the steps taken by client application and gateway when this method is triggered: The client formulates an *InvokeFunction* request message (i) in according to the structure defined in Table 1.  
+The client starts by formulating an *Invoke* request message (i) in according to the structure defined in the [invocation](#invocation) section.  Once the message is formulated the client has to sign it using the algorithm  "SHA256withECDSA" and the normative curve "secp256k1", and then send it to the SCIP gateway. At this point the gateway formulates a blockchain (technology-specific) transaction out of the request message (using the **identifier**, and **params** fields), and signs it on behalf of the client application. Afterwords it stored the pair defined by the signed transaction (Tx) and the Signed Request Message (SRM) for the purpose of non-repudiation (ii) .
 
 <br/>
 
 <figure>
     <img src="images/invoke-steps-fig.png" width="600px">
-    <figcaption><strong>Figure 2</strong>  -  Steps performed by client and gateway during the execution of *InvokeFunction* method</figcaption>
+    <figcaption><strong>Figure 2</strong>  -  Steps performed by client and gateway during the execution of *Invoke* method</figcaption>
 </figure>
 
 <br/><br/>
 
-Once the message is formulated the client has to sign it using the algorithm  "SHA256withECDSA" and the normative curve "secp256k1", and then send it to the SCIP gateway. At this point the gateway formulates a blockchain (technology-specific) transaction out of the request message (using the **identifier**, and **params** fields), and signs it on behalf of the client application. Afterwords it stored the pair defined by the signed transaction (Tx) and the Signed Request Message (SRM) for the purpose of non-repudiation (ii) . The SRM exchange is mandatory whether the client and the gateway are managed by two different entities, otherwise it is not yet necessary. Once the transaction is formulated and signed, the gateway sends it to a blockchain node using its API (iii). The node, then, validates it, by executing the target smart contract function locally, and start the consensus process by announcing it  to the network of nodes (iv). Afterwords, it assigns a unique identifier to the transaction, and informs the gateway about it along the potential output values (v). Afterwords, the gateway informs the client application about the successful submission of the transaction (synchronous response to the original client request (i)) (vi), and at the same time, starts querying the blockchain node about the status of the transaction (vii). If the transaction receives enough confidence, in according to the **doc** field of the request message before the **timeout** is reached,  the gateway sends an asynchronous message to the address specified in **callback** field containing the execution results (viii).  
+The SRM exchange is mandatory whether the client and the gateway are managed by two different entities, otherwise it is not yet necessary. Once the transaction is formulated and signed, the gateway sends it to a blockchain node using its API (iii). The node, then, validates it, by executing the target smart contract function locally, and start the consensus process by announcing it  to the network of nodes (iv). Afterwords, it assigns a unique identifier to the transaction, and informs the gateway about it along the potential output values (v). Afterwords, the gateway informs the client application about the successful submission of the transaction (synchronous response to the original client request (i)) (vi), and at the same time, starts querying the blockchain node about the status of the transaction (vii). If the transaction receives enough confidence, in according to the **degree of confidence** field of the request message before the **timeout** is reached,  the gateway sends an asynchronous message to the address specified in **callback** field containing the execution results (viii).  Note that the gateway is allowed to have its own internal timeout for such requests, which may differ from the one provided by the client. Therefore, clients should expect an asynchronous *timeout error*. To facilitate the correlation between the request message and the response message by the client application, the callback contains a copy of the Correlation identifier provided in the request message.
 
 <br/>
-<figure>
-    <img src="images/invocation-table.png" width="600px">
-    <figcaption><strong>Table 1</strong>  -  The structure of the <i>InvokeFunction</i> request and response message</figcaption>
-</figure>  
-<br/>
-
-### Live Monitoring
-
-This category includes methods that facilitate the live monitoring of interesting proceedings related to the invocation and execution of smart contracts functions. In particular the ***SubscribeToEvent*** method allows client to receive notification regarding the occurrences of specific custom- or system-defined events that are emitted during the execution of smart contract functions, whereas ***SubscribeToFunction*** method allows client to receive notification regarding the invocation of a specific smart contract function. In order to trigger one of these methods the client has to send to the gateway a request structured as state in Table 2. Basically each subscription is identified by the the following tuple <*type, identifier, params, corrId*> where the *type* indicates whether it is an event- or function-subscription.  
 
 <br/>
-<figure>
-    <img src="images/subscribe-table.png" width="600px">
-    <figcaption><strong>Table 2</strong>  -  The structure of the <i>SubscribeToEvent</i> and <i>SubscribeToFunction</i> request and response messages</figcaption>
-</figure>  
-<br/><br/>
-
-Obviously for each subscription method there exist a respective cancel one, hence the methods are ***CancelEventSubscription*** and ***CancelFunctionSubscription*** that allow client to explicitly cancel a subscriptions previously created with the appropriate invocation to *SubscribeToEvent* and *SubscribeToFunction* respectively. A cancel subscription method can be used in four different ways in according to which fields are provided by the client in  the request structure (as defined in Table 3): (i) when only **identifier** and **params** are present, then all corresponding event/function subscriptions are cancelled; (ii) when only a correlation identifier (**corrId**) is provided then all event/function subscription that correspond to it are cancelled; (iii) when all components are present, then the single event/function subscription that corresponds to them is cancelled; (iv) finally, when none of them is present, then all event/function subscriptions of this specific client are cancelled.  
-
-<br/>
-<figure>
-    <img src="images/cancel-subscription-table.png" width="600px">
-    <figcaption><strong>Table 3</strong>  -  The structure of the <i>CancelEventSubscription</i> and <i>CancelFunctionSubscription</i> request message.</figcaption>
-</figure>  
-<br/><br/>
-
-
-### Querying
-
-The methods in this category allow a client application to query the previous occurrences of an event or the previous invocation of a smart contract function, in particular these methods are called ***QueryEventOccurrences*** and ***QueryFunctionInvocations*** respectively. In order to trigger this kind of methods a client has to provide to the gateway a message structured as stated in Table 4, once the request is received by the gateway, it scans the history of the blockchain and searches for event occurrences / function invocations with a prototype that matches the provided **identifier** and **params** fields. The client can even specify a time frame in which the search results should be considered and returned. Moreover, an optional **filter** can be specified in order to select only result that satisfy the filtering options. The filter is specified in the form of a C-style boolean expression that uses the outputs of the event / the inputs of the function invocation. These methods are fully synchronous because they don't need any blockchain transaction execution, hence a result is synchronously returned to the client application containing the list of event occurrences / function invocations found.  
-
-<br/>
-<figure>
-    <img src="images/querying-table.png" width="600px">
-    <figcaption><strong>Table 4</strong>  -  The structure of the <i>QueryEventOccurrences</i> and <i>QueryFunctionInvocations</i> request and response messages.</figcaption>
-</figure>  
-<br/><br/>
 
 ## JSON-RPC Binding
 
-SCIP does not force to use a specific protocol for carrying all these messages, hence different bindings could be used. Here, we propose a JSON-RPC binding for SCIP, which is a stateless transport-agnostic remote procedure call protocol that uses JSON as its data format. JSON-RPC supports two Message Exchange Patterns (MEP) betwee na client and a server,  ***request-response*** and ***notification***. Since all our methods produce a synchronous response, we embed the initial message exchange in a request-response MEP,  where the client application plays the role of JSON-RPC client whereas the gateway plays the role of JSON-RPC server. Three methods (i.e., *InvokeFunction, SubscribeToEvent* and *SubscribeToFunction*) also have one or more asynchronous responses, which we embed in notification MEP sent from the gateway to the client application, here the gateway and the client application switch their JSON-RPC roles.  
+SCIP does not force to use a specific protocol for carrying all these messages, hence different bindings could be used. Here, we propose a JSON-RPC binding for SCIP, which is a stateless transport-agnostic remote procedure call protocol that uses JSON as its data format. JSON-RPC supports two Message Exchange Patterns (MEP) between a client and a server,  ***request-response*** and ***notification***. Since all our methods produce a synchronous response, we embed the initial message exchange in a request-response MEP,  where the client application plays the role of JSON-RPC client whereas the gateway plays the role of JSON-RPC server. Two methods (i.e., *Invoke* and *Subscribe*) also have one or more asynchronous responses, which we embed in notification MEP sent from the gateway to the client application, here the gateway and the client application switch their JSON-RPC roles.  
 
 ### Request
 
@@ -196,25 +194,28 @@ A JSON-RPC notification message has the same template as the request message but
 
 ## Examples
 
-A simple example of JSON-RPC messages exchange for the **SubscribeToEvent** SCIP method is the following (Here, ```-->``` indicates a message from the client application to the gateway, whereas ```<--``` indicates a message in the other direction):
+A simple example of JSON-RPC messages exchange for the **Subscribe** to event SCIP method is the following (Here, ```-->``` indicates a message from the client application to the gateway, whereas ```<--``` indicates a message in the other direction):
 
 ```
 // Client request
 --> {
 	"jsonrpc": "2.0", 
-	"method": "SubscribeToEvent", 					// Name of the request
+	"method": "Subscribe", 					       // Name of the request
 	"id": 1,
 	"params": {
-		"identifier": "priceChanged",				// Name of the event
+		"eventId": "priceChanged",				// Name of the event
 		"params": [{
 			"name": "newPrice",				// Name of the parameter
-			"isInput": false,				// It is an output parameter
-			"natType": "uint256"				// Native type
+			"type": {				      // Parameter type
+				"type": "integer",
+				"minValue": 0,
+				"maxValue": 65535
+			}
 		}],
 		"doc": 98.9,						// Degree of Confidence 
 		"corrId": "abcdefg12345",
 		"callback": "https://my-domain.com/callbacks",
-		"filter": "newPrice >= 500"
+		"filter": "newPrice <= 500"
 	}
 }
 	
@@ -230,16 +231,14 @@ A simple example of JSON-RPC messages exchange for the **SubscribeToEvent** SCIP
 	"jsonrpc": "2.0", 
 	"method": "ReceiveCallback",
 	"params": {
-		"identifier": "priceChanged",				// Name of the event
+		"eventId": "priceChanged",				// Name of the event
 		"params": [{
 			"name": "newPrice",				// Name of the parameter
-			"isInput": false,				// It is an output parameter
-			"natType": "uint256",				// Native type
-			"value": 670					// Value of the parameter
+			"value": 410,    				// Value of the parameter
+			...
 		}],
-		"doc": 98.9,						// Degree of Confidence 
 		"corrId": "abcdefg12345",
-		"when": "2019-11-06T17:08:00Z"
+		"timestamp": "2019-11-06T17:08:00Z"
 	}
 }
 ```
