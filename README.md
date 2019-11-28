@@ -29,7 +29,7 @@ Every method is associated to a specific request message, all of them can be fou
 <br/><br/>
 
 <figure>
-    <img src="images/messages-metamodel.png" width="700px">
+    <img src="images/messages-metamodel.png" width="800px">
     <figcaption><strong>Figure 1</strong>  -  The metamodel of SCIP messages.</figcaption>
 </figure>
 
@@ -38,7 +38,7 @@ Every method is associated to a specific request message, all of them can be fou
 All methods return a *synchronous* response message indicating the success or failure of the request, and some of them additionally return one or more *asynchronous* responses or errors. **Table 1** provides a detailed description of all call constructs defined in the previous metamodel.
 
 <figure>
-    <img src="images/fields-table.png" width="800px">
+    <img src="images/fields-table.png" width="700px">
     <figcaption><strong>Table 1</strong>  -  Description of fields used in SCIP protocol.</figcaption>
 </figure>
 
