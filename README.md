@@ -96,7 +96,7 @@ This request is performed through the **Query** method, its purpose is to allow 
 <br/>
 
 <figure>
-    <img src="images/querying-table.png" width="600px">
+    <img src="images/querying-table.png" width="550px">
     <figcaption><strong>Table 5</strong>  -  The structure of the <i>Query</i> request and response messages.</figcaption>
 </figure> 
 
