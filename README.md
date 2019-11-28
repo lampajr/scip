@@ -83,7 +83,7 @@ or event identifier plus parameters are present, then all respective subscriptio
 <br/>
 
 <figure>
-    <img src="images/cancel-subscription-table.png" width="600px">
+    <img src="images/cancel-subscription-table.png" width="550px">
     <figcaption><strong>Table 4</strong>  -  The structure of the <i>Unsubscribe</i> request message.</figcaption>
 </figure>  
 
