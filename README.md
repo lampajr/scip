@@ -33,7 +33,7 @@ Every method is associated to a specific request message, all of them can be fou
     <figcaption><strong>Figure 1</strong>  -  The metamodel of SCIP messages.</figcaption>
 </figure>
 
-<br/>
+<br/><br/>
 
 All methods return a *synchronous* response message indicating the success or failure of the request, and some of them additionally return one or more *asynchronous* responses or errors. **Table 1** provides a detailed description of all call constructs defined in the previous metamodel.
 
@@ -42,7 +42,7 @@ All methods return a *synchronous* response message indicating the success or fa
     <figcaption><strong>Table 1</strong>  -  Description of fields used in SCIP protocol.</figcaption>
 </figure>
 
-<br/>
+<br/><br/>
 
 Some methods may require a point in time at which an event or a function took place, in this context the *time* refers to the UTC timestamp of the transaction that triggered the event or invoked the function. In particular the time is represented using the ISO 8601-1:2019 combined date and time representation. Certain other methods have a parameter called *degree of confidence* (DoC), which refers to the likelihood that a transaction included in a block will remain persistently stored on the blockchain. A value close to 1 means that the client application wants to receive the result only after ruling out the possibility that the block - including the transaction - may eventually be dropped from the blockchain, whereas a value close to 0 means that the client wants to receive the result as soon as it is available.
 
@@ -59,7 +59,7 @@ The invocation request is performed through the **Invoke** method, which allows 
     <figcaption><strong>Table 2</strong>  -  The structure of the <i>Invoke</i> request and response message</figcaption>
 </figure>  
 
-<br/>
+<br/><br/>
 
 ### Subscription
 
@@ -73,7 +73,7 @@ use, then the old subscription is cancelled and replaced with the new one. This 
     <figcaption><strong>Table 3</strong>  -  The structure of the <i>Subscribe</i> request and response messages</figcaption>
 </figure>  
 
-<br/>
+<br/><br/>
 
 ### Unsubscription
 
@@ -87,7 +87,7 @@ or event identifier plus parameters are present, then all respective subscriptio
     <figcaption><strong>Table 4</strong>  -  The structure of the <i>Unsubscribe</i> request message.</figcaption>
 </figure>  
 
-<br/>
+<br/><br/>
 
 ### Querying
 
@@ -100,7 +100,7 @@ This request is performed through the **Query** method, its purpose is to allow 
     <figcaption><strong>Table 5</strong>  -  The structure of the <i>Query</i> request and response messages.</figcaption>
 </figure> 
 
-<br/>
+<br/><br/>
 
 ### Step-by-Step Function Invocation
 
@@ -115,7 +115,7 @@ The client starts by formulating an *Invoke* request message (i) in according to
     <figcaption><strong>Figure 2</strong>  -  Steps performed by client and gateway during the execution of *Invoke* method</figcaption>
 </figure>
 
-<br/>
+<br/><br/>
 
 The SRM exchange is mandatory whether the client and the gateway are managed by two different entities, otherwise it is not yet necessary. Once the transaction is formulated and signed, the gateway sends it to a blockchain node using its API (iii). The node, then, validates it, by executing the target smart contract function locally, and start the consensus process by announcing it  to the network of nodes (iv). Afterwords, it assigns a unique identifier to the transaction, and informs the gateway about it along the potential output values (v). Afterwords, the gateway informs the client application about the successful submission of the transaction (synchronous response to the original client request (i)) (vi), and at the same time, starts querying the blockchain node about the status of the transaction (vii). If the transaction receives enough confidence, in according to the **degree of confidence** field of the request message before the **timeout** is reached,  the gateway sends an asynchronous message to the address specified in **callback** field containing the execution results (viii).  Note that the gateway is allowed to have its own internal timeout for such requests, which may differ from the one provided by the client. Therefore, clients should expect an asynchronous *timeout error*. To facilitate the correlation between the request message and the response message by the client application, the callback contains a copy of the Correlation identifier provided in the request message.
 
