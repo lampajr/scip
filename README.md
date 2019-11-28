@@ -29,7 +29,7 @@ Every method is associated to a specific request message, all of them can be fou
 <br/><br/>
 
 <figure>
-    <img src="images/messages-metamodel.png" width="800px">
+    <img src="images/messages-metamodel.png" width="700px">
     <figcaption><strong>Figure 1</strong>  -  The metamodel of SCIP messages.</figcaption>
 </figure>
 
