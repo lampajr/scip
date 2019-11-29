@@ -44,9 +44,11 @@ All methods return a *synchronous* response message indicating the success or fa
 
 <br/><br/>
 
-Some methods may require a point in time at which an event or a function took place, in this context the *time* refers to the UTC timestamp of the transaction that triggered the event or invoked the function. In particular the time is represented using the ISO 8601-1:2019 combined date and time representation. Certain other methods have a parameter called *degree of confidence* (DoC), which refers to the likelihood that a transaction included in a block will remain persistently stored on the blockchain. A value close to 1 means that the client application wants to receive the result only after ruling out the possibility that the block - including the transaction - may eventually be dropped from the blockchain, whereas a value close to 0 means that the client wants to receive the result as soon as it is available.
+Some methods may require a point in time at which an event or a function took place, in this context the *time* refers to the UTC timestamp of the transaction that triggered the event or invoked the function. In particular the time is represented using the ISO 8601-1:2019 combined date and time representation. Certain other methods have a parameter called *degree of confidence* (DoC), which refers to the likelihood that a transaction included in a block will remain persistently stored on the blockchain. A value close to 1 means that the client application wants to receive the result only after ruling out the possibility that the block - including the transaction - may eventually be dropped from the blockchain, whereas a value close to 0 means that the client wants to receive the result as soon as it is available. 
 
+The parameter structure is exactly the same defined in the *Smart Contract Description Language* specification ([SCDL](https://bit.ly/2JZUA5S)). Note that for the type we have used a technology-agnostic, abstract format using JSON Schema, this because blockchains support different encoding and types for parameters passed to or returned from smart contract functions or events, hence thanks to this proposed abstract format, developers can uniquely and abstractly describe native blockchain data types, and client applications can formulate function inputs in text-based JSON, without having to understand native data types. A complete table of abstract format types definition for different blockchains can be found [here](https://github.com/floriandanielit/scdl/blob/master/README.md#data-encoding).
 
+<br/>
 
 ### Invocation
 
@@ -167,13 +169,14 @@ Instead, when an error is detected, the synchronous response that indicates it h
     "jsonrpc": "2.0",
     "error": {
     	"code": <code>,
-    	"message": <msg>
+    	"message": <msg>,
+    	"data": <data>
     },
     "id": <id>
 }
 ```
 
-As before, ```"id"``` is assigned to the same *id* used in the request message, whereas the ```"code"``` member is assigned to a suitable error code as indicated by Table 5.  Finally the ```"message"``` member is assigned a suitable description of the error. Note that, JSON-RPC-specific errors are also reported using such response messages.
+As before, ```"id"``` is assigned to the same *id* used in the request message, whereas the ```"code"``` member is assigned to a suitable error code as indicated by Table 5.  Finally the ```"message"``` member is assigned a suitable description of the error and an optional primitive or structured ```data``` member can be added in order to provide additional information about the error. Note that, JSON-RPC-specific errors are also reported using such response messages.
 
 <figure>
     <img src="images/errors-table.png" width="600px">
@@ -202,8 +205,8 @@ A simple example of JSON-RPC messages exchange for the **Subscribe** to event SC
 			"name": "newPrice",				// Name of the parameter
 			"type": {				        // Parameter type
 				"type": "integer",
-				"minValue": 0,
-				"maxValue": 65535
+				"minimum": 0,
+				"maximum": 65535
 			}
 		}],
 		"doc": 98.9,						// Degree of Confidence 
@@ -240,122 +243,3 @@ A simple example of JSON-RPC messages exchange for the **Subscribe** to event SC
 ## Data Encoding
 
 Here we show how blockchain native types of some blockchains can be mapped to JSON Schema.
-
-### Ethereum
-
-#### uint\<M\>
-
-```
-{
-	"type": "integer",
- 	"minimum": 0,
- 	"maximum": 2^M - 1
-}
-```
-
-#### int\<M\>
-
-```
-{
-	"type": "integer",
- 	"minimum": -2^(M-1),
- 	"maximum": +2^(M-1) - 1
-}
-```
-
-#### address
-
-```
-{
-	"type": "string",
-	"pattern": "^0x[a-fA-F0-9]{40}$"
-}
-```
-
-#### bool
-
-```
-{
-	"type": "boolean",
-}
-```
-
-#### fixed\<M\>x\<N\>
-
-```
-{
-	"type": "number",
-	"minimum": -2^(M-1),
-	"maximum": +2^(M-1) - 1,
-	"multipleOf": 10^(-N)
-}
-```
-
-#### bytes\<M\>
-
-```
-{
-	"type": "array",
-	"maxItems": M,
-	"items": {
-		"type": "string",
-		"pattern": "^[a-fA-F0-9]{2}$"
-	}
-}
-```
-
-#### \<type\>[M]
-
-```
-{
-	"type": "array",
-	"maxItems": M,
-	"items": <type>
-}
-```
-
-#### \<type\>[]
-
-```
-{
-	"type": "array",
-	"items": <type>
-}
-```
-
-#### bytes
-
-```
-{
-	"type": "array",
-	"items": {
-		"type": "string",
-		"pattern": "^[a-fA-F0-9]{2}$"
-	}
-}
-```
-
-
-#### string
-
-```
-{
-	"type": "string",
-}
-```
-
-#### (T1, T2, .... Tn)
-
-```
-{
-	"type": "array",
-	"items": [
-		{"type": <T1>},
-		{"type": <T2>},
-		...,
-		{"type": <Tn>}
-	]
-}
-```
-
-
