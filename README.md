@@ -239,7 +239,3 @@ A simple example of JSON-RPC messages exchange for the **Subscribe** to event SC
 	}
 }
 ```
-
-## Data Encoding
-
-Here we show how blockchain native types of some blockchains can be mapped to JSON Schema.
