@@ -179,7 +179,7 @@ Instead, when an error is detected, the synchronous response that indicates it h
 As before, ```"id"``` is assigned to the same *id* used in the request message, whereas the ```"code"``` member is assigned to a suitable error code as indicated by Table 5.  Finally the ```"message"``` member is assigned a suitable description of the error and an optional primitive or structured ```data``` member can be added in order to provide additional information about the error. Note that, JSON-RPC-specific errors are also reported using such response messages.
 
 <figure>
-    <img src="images/errors-table.png" width="600px">
+    <img src="images/errors-table.png" width="650px">
     <figcaption><strong>Table 5</strong>  -  Synchronous and Asynchronous SCIP errors and their codes.</figcaption>
 </figure> 
 
